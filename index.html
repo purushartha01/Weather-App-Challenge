@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <nav>
+      <img src="./assets/images/logo.svg" alt="" />
+      <div class="custom-dropdown">
+        <select name="unit-selector" id="unit-selector-menu">
+          <option value="default">Units</option>
+          <option value="" id="unit-selector-default">
+            Switch to Imperial
+          </option>
+          <optgroup label="Temperature">
+            <option value="metric">Celsius (°C)</option>
+            <option value="imperial">Fahrenheit (°F)</option>
+          </optgroup>
+          <optgroup label="Wind Speed">
+            <option value="metric">km/h</option>
+            <option value="imperial">mph</option>
+          </optgroup>
+          <optgroup label="Precipitation">
+            <option value="metric">Millimeters (mm)</option>
+            <option value="imperial">Inches (in)</option>
+          </optgroup>
+        </select>
+      </div>
+    </nav>
+    <main>
+      <section class="search-wrapper">
+        <h1>How's the sky looking today?</h1>
+        <div class="search-container">
+          <div class="search-bar">
+            <span>
+              <img src="./assets/images/icon-search.svg" alt="Search icon" />
+            </span>
+            <input
+              type="text"
+              name="city-name"
+              id="city-name"
+              placeholder="Search for a place..."
+              autocomplete="off"
+            />
+            <ul class="search-suggestions"></ul>
+          </div>
+          <button id="get-city-weather">Search</button>
+        </div>
+      </section>
+      <section class="current-forecast">
+        <div class="forecast-banner">
+          <div>
+            <span id="location">New York, NY</span>
+            <span id="forecast-day-date">March 15, 2023</span>
+          </div>
+          <img src="./assets/images/icon-sunny.webp" alt="" id="weather-icon" />
+          <span id="current-temp">68&deg;</span>
+        </div>
+        <div>
+          <span>Feels like</span>
+          <span id="perceived-temperature-value">64&deg;</span>
+        </div>
+        <div>
+          <span>Humidity</span>
+          <span id="humidity-value">46%</span>
+        </div>
+        <div>
+          <span>Wind</span>
+          <span id="wind-speed-value">9 mph</span>
+        </div>
+        <div>
+          <span>Precipitation</span>
+          <span id="precipitation-value">0 in</span>
+        </div>
+      </section>
+      <section class="daywise-forecast">
+        <h2>Daily forecast</h2>
+        <div class="weekday-card">
+          <span></span><img src="" alt="" /><span></span><span></span>
+        </div>
+        <div class="weekday-card">
+          <span></span><img src="" alt="" /><span></span><span></span>
+        </div>
+        <div class="weekday-card">
+          <span></span><img src="" alt="" /><span></span><span></span>
+        </div>
+        <div class="weekday-card">
+          <span></span><img src="" alt="" /><span></span><span></span>
+        </div>
+        <div class="weekday-card">
+          <span></span><img src="" alt="" /><span></span><span></span>
+        </div>
+        <div class="weekday-card">
+          <span></span><img src="" alt="" /><span></span><span></span>
+        </div>
+        <div class="weekday-card">
+          <span></span><img src="" alt="" /><span></span><span></span>
+        </div>
+      </section>
+      <section class="hourly-forecast">
+        <div>
+          <h2>Hourly forecast</h2>
+          <select name="" id=""></select>
+        </div>
+        <div class="hourly-forecast-card-container">
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+          <div class="hourly-forecast-card">
+            <span></span><img src="" alt="" /><span></span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
