@@ -30,6 +30,7 @@ const pageLoadingState = {
     }
 }
 
+
 document.addEventListener("DOMContentLoaded", () => {
     console.log("DOM fully loaded and parsed");
     const cityNameInput = document.querySelector("#city-name");
@@ -92,8 +93,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const getCityWeatherBtn = document.querySelector("#get-city-weather");
-    getCityWeatherBtn.addEventListener("click", getCityWeather);
-
+    getCityWeatherBtn.addEventListener("click", async () => {
+        await getCityWeather();
+    });
 });
 
 
@@ -200,7 +202,7 @@ async function getCityWeather() {
         //         "apparent_temperature": 30,
         //         "weather_code": 1,
         //         "relative_humidity_2m": 92,
-        //         "is_day": 0
+        //         "is_day": 0->night, 1->day
         //     },
         //     "hourly_units": {
         //         "time": "iso8601",
@@ -769,11 +771,13 @@ async function getCityWeather() {
         weather.daily = { values: weatherData.daily, units: weatherData.daily_units };
         weather.hourly = { values: weatherData.hourly, units: weatherData.hourly_units };
         console.log("Weather Object:", weather);
-        renderWeatherData();
+        pageLoadingState.setIsLoading(false);
+        setPageToLoading(pageLoadingState.isLoading);
 
+        renderWeatherData();
     } catch (err) {
         console.error("Error fetching weather data:", err);
-    } finally {
+
         pageLoadingState.setIsLoading(false);
         setPageToLoading(pageLoadingState.isLoading);
     }
@@ -781,40 +785,75 @@ async function getCityWeather() {
 
 
 function renderWeatherData() {
+    const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const daysOfWeekShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     // Elements to be updated in current weather section on data fetch
-    const currentLocationElement = document.querySelector("#location");
-    const currentWeatherIconElement = document.querySelector("#current-weather-icon");
-    const currentperceivedTemperatureElement = document.querySelector("#perceived-temperature-value");
-    const currentHumidityElement = document.querySelector("#humidity-value");
-    const currentWindSpeedElement = document.querySelector("#wind-speed-value");
-    const currentPrecipitationElement = document.querySelector("#precipitation-value");
-
-    currentLocationElement.textContent = `${cities.selectedCity.address.city ?? cities.selectedCity.address.town ?? cities.selectedCity.address.municipality ?? cities.selectedCity.address.village ?? ""}, ${cities.selectedCity.address.country ?? ""}`;
-
-
-
-
-    // Elements to be updated in daily weather section on data fetch
-    const dailyWeatherContainerList = document.querySelectorAll(".weekday-card");
-    dailyWeatherContainerList.forEach((dayCard, index) => {
-        const maximumTempElement = dayCard.children[0];
-        const weatherIconElement = dayCard.children[1];
-        const minimumTempElement = dayCard.children[2];
-
-        // rendered fetched data in components
-
-    })
+    try {
+        const currentLocationElement = document.querySelector("#location");
+        const currentDateElement = document.querySelector("#forecast-day-date");
+        const currentWeatherIconElement = document.querySelector("#weather-icon");
+        const currentTemperature = document.querySelector("#current-temp");
+        const currentperceivedTemperatureElement = document.querySelector("#perceived-temperature-value");
+        const currentHumidityElement = document.querySelector("#humidity-value");
+        const currentWindSpeedElement = document.querySelector("#wind-speed-value");
+        const currentPrecipitationElement = document.querySelector("#precipitation-value");
 
 
-    // Elements to be updated in hourly weather section on data fetch
-    const hourlyWeatherContainerList = document.querySelectorAll(".hourly-forecast-card");
-    hourlyWeatherContainerList.forEach((hourCard, index) => {
-        const weatherIconElement = hourCard.children[0];
-        const timeElement = hourCard.children[1];
-        const temperatureElement = hourCard.children[2];
-    })
+        currentLocationElement.textContent = `${cities.selectedCity.address.city ?? cities.selectedCity.address.town ?? cities.selectedCity.address.municipality ?? cities.selectedCity.address.village ?? ""}, ${cities.selectedCity.address.country ?? ""}`;
 
+        const currentDay = new Date(weather.current.values.time.split("T")[0]);
+
+        currentDateElement.textContent = `${daysOfWeek[currentDay.getDay()]}, ${months[currentDay.getMonth()]} ${currentDay.getDate()}, ${currentDay.getFullYear()}`;
+
+
+        const currentWeatherIconMetaData = getWeatherIconURL(weather.current.values.weather_code, weather.current.values.is_day);
+
+        console.log(currentWeatherIconMetaData);
+
+        currentWeatherIconElement.src = currentWeatherIconMetaData.iconURL;
+        currentWeatherIconElement.alt = currentWeatherIconMetaData.altText;
+        currentTemperature.textContent = `${weather.current.values.temperature_2m}°`;
+
+        currentperceivedTemperatureElement.textContent = `${weather.current.values.apparent_temperature}°`;
+        currentHumidityElement.textContent = `${weather.current.values.relative_humidity_2m}${weather.current.units.relative_humidity_2m}`;
+        currentWindSpeedElement.textContent = `${weather.current.values.wind_speed_10m} ${weather.current.units.wind_speed_10m}`;
+        currentPrecipitationElement.textContent = `${weather.current.values.precipitation} ${weather.current.units.precipitation}`;
+
+        /*------------------------------------------------------------------------------------------------------------------------------------------------------------ */
+        // Elements to be updated in daily weather section on data fetch
+        const dailyWeatherContainerList = document.querySelectorAll(".weekday-card");
+
+        dailyWeatherContainerList.forEach((dayCard, index) => {
+            const dayElement = dayCard.children[0];
+            const weatherIconElement = dayCard.children[1];
+            const maximumTempElement = dayCard.children[2];
+            const minimumTempElement = dayCard.children[3];
+
+            // rendered fetched data in components
+            const dayDate = new Date(weather.daily.values.time[index]);
+            dayElement.textContent = `${daysOfWeekShort[dayDate.getDay()]}`;
+            const dailyWeatherIconMetaData = getWeatherIconURL(weather.daily.values.weather_code[index], 1);
+            weatherIconElement.src = dailyWeatherIconMetaData.iconURL;
+            weatherIconElement.alt = dailyWeatherIconMetaData.altText;
+            maximumTempElement.textContent = `${weather.daily.values.temperature_2m_max[index]}`;
+            minimumTempElement.textContent = `${weather.daily.values.temperature_2m_min[index]}`;
+        })
+
+        /*------------------------------------------------------------------------------------------------------------------------------------------------------------ */
+        // Elements to be updated in hourly weather section on data fetch
+        const hourlyWeatherContainerList = document.querySelectorAll(".hourly-forecast-card");
+        hourlyWeatherContainerList.forEach((hourCard, index) => {   
+            const weatherIconElement = hourCard.children[0];
+            const timeElement = hourCard.children[1];
+            const temperatureElement = hourCard.children[2];
+        })
+
+    }
+    catch (err) {
+        console.error("Error fetching weather data:", err);
+    }
 }
 
 
@@ -847,8 +886,63 @@ function setPageToLoading(indicator) {
 }
 
 function getWeatherIconURL(weatherCode, isDay) {
-    switch(weatherCode){
-        
-
+    const result = {
+        weatherCondition: "",
+        iconURL: "",
+        altText: ""
     }
+    switch (true) {
+        case (weatherCode === 0 || weatherCode === 1):
+            if (isDay) {
+                result.weatherCondition = "Clear sky";
+                result.iconURL = "./assets/images/icon-sunny.webp";
+                result.altText = "Clear sky during day";
+            } else {
+                result.weatherCondition = "Clear sky";
+                result.iconURL = "./assets/images/icon-moon.png";
+                result.altText = "Clear sky during night";
+            }
+            break;
+        case weatherCode === 2:
+            result.weatherCondition = "Partly cloudy";
+            result.iconURL = "./assets/images/icon-partly-cloudy.webp";
+            result.altText = "Partly cloudy";
+            break;
+        case (weatherCode === 3):
+            result.weatherCondition = "Overcast";
+            result.iconURL = "./assets/images/icon-overcast.webp";
+            result.altText = "Overcast";
+            break;
+        case (weatherCode >= 45 && weatherCode <= 48):
+            result.weatherCondition = "Fog";
+            result.iconURL = "./assets/images/icon-fog.webp";
+            result.altText = "Fog";
+            break;
+        case (weatherCode >= 51 && weatherCode <= 57):
+            result.weatherCondition = "Drizzle";
+            result.iconURL = "./assets/images/icon-drizzle.webp";
+            result.altText = "Drizzle";
+            break;
+        case ((weatherCode >= 61 && weatherCode <= 67) || (weatherCode >= 80 && weatherCode <= 82)):
+            result.weatherCondition = "Rain";
+            result.iconURL = "./assets/images/icon-rain.webp";
+            result.altText = "Rain";
+            break;
+        case ((weatherCode >= 71 && weatherCode <= 77) || (weatherCode >= 85 && weatherCode <= 86)):
+            result.weatherCondition = "Snow";
+            result.iconURL = "./assets/images/icon-snow.webp";
+            result.altText = "Snow";
+            break;
+        case (weatherCode >= 95 && weatherCode <= 99):
+            result.weatherCondition = "Thunderstorm";
+            result.iconURL = "./assets/images/icon-storm.webp";
+            result.altText = "Thunderstorm";
+            break;
+        default:
+            result.weatherCondition = "Unpredictable";
+            result.iconURL = "./assets/images/icon-na.svg";
+            result.altText = "Weather is Unpredictable";
+            break;
+    }
+    return result;
 }
