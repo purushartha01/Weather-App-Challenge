@@ -54,9 +54,8 @@ const errorLoadingState = {
         // Add listener only once
         if (!retryBtn.dataset.listenerAdded) {
             retryBtn.addEventListener("click", async () => {
-                mainContainer.classList.remove("hide");
-                errorPage.classList.add("hide");
                 this.isAPIError = false;
+                window.location.reload();
             });
             retryBtn.dataset.listenerAdded = "true";
         }
@@ -70,12 +69,10 @@ const unitState = {
     },
 }
 
-
-
 document.addEventListener("DOMContentLoaded", () => {
     try {
 
-        console.log("DOM fully loaded and parsed");
+        console.log("DOM fully loaded");
         {
             const unitSelector = document.querySelector(".unit-selector-menu");
             const unitMenuButton = unitSelector.querySelector("button");
@@ -332,7 +329,7 @@ async function getCityWeather() {
 
 
     try {
-        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${roundedLat}&longitudes=${roundedLong}${weatherParams}`);
+        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${roundedLat}&longitude=${roundedLong}${weatherParams}`);
 
         if (!weatherRes.ok) {
             console.log(`Error fetching data: ${weatherRes.statusText}`);
@@ -410,11 +407,18 @@ function renderWeatherData() {
         const dailyWeatherContainerList = document.querySelectorAll(".weekday-card");
 
         dailyWeatherContainerList.forEach((dayCard, index) => {
-            const dayElement = dayCard.children[0];
-            const weatherIconElement = dayCard.children[1];
-            const maximumTempElement = dayCard.children[2];
-            const minimumTempElement = dayCard.children[3];
+            // const dayElement = dayCard.children[0];
+            const dayElement = document.createElement("span");
+            const weatherIconElement = document.createElement("img");
+            const maximumTempElement = document.createElement("span");
+            const minimumTempElement = document.createElement("span");
 
+
+            dailyWeatherContainerList[index].replaceChildren();
+            dailyWeatherContainerList[index].appendChild(dayElement);
+            dailyWeatherContainerList[index].appendChild(weatherIconElement);
+            dailyWeatherContainerList[index].appendChild(maximumTempElement);
+            dailyWeatherContainerList[index].appendChild(minimumTempElement);
             // rendered fetched data in components
             const dayDate = getFormattedDate(weather.daily.values.time[index], { weekday: 'short' });
             dayElement.textContent = `${dayDate}`;
@@ -453,9 +457,14 @@ function renderedHourlyData(hourlyDaySelectElement) {
     const hourlyWeatherContainerList = document.querySelectorAll(".hourly-forecast-card");
 
     hourlyWeatherContainerList.forEach((hourCard, index) => {
-        const timeElement = hourCard.children[0];
-        const weatherIconElement = hourCard.children[1];
-        const temperatureElement = hourCard.children[2];
+        const timeElement = document.createElement("span");
+        const weatherIconElement = document.createElement("img");
+        const temperatureElement = document.createElement("span");
+
+        hourlyWeatherContainerList[index].replaceChildren();
+        hourlyWeatherContainerList[index].appendChild(timeElement);
+        hourlyWeatherContainerList[index].appendChild(weatherIconElement);
+        hourlyWeatherContainerList[index].appendChild(temperatureElement);
 
         // rendered fetched data in components
 
@@ -475,27 +484,81 @@ function renderedHourlyData(hourlyDaySelectElement) {
 
 function setPageToLoading(indicator) {
     const currentWeatherSection = document.querySelector(".current-forecast");
-    const dailyWeatherSection = document.querySelector(".daywise-forecast");
-    const hourlyWeatherSection = document.querySelector(".hourly-forecast");
+    const dailyWeatherSection = document.querySelectorAll(".weekday-card");
+    const hourlyWeatherSection = document.querySelectorAll(".hourly-forecast-card");
 
 
 
     if (indicator) {
-        const currentWeatherSectionChildren = currentWeatherSection.children;
-        const dailyWeatherSectionChildren = dailyWeatherSection.children;
-        const hourlyWeatherSectionChildren = hourlyWeatherSection.children;
+        const currentWeatherSectionChildren = {
+            bannerElement: currentWeatherSection.firstChild,
+            metrics: []
+        };
+        const dailyWeatherSectionChildren = [];
+        const hourlyWeatherSectionChildren = [];
+
+        const metricsValueElement = currentWeatherSection.querySelectorAll("div:not(:first-child)>span:last-child");
+
+
+        currentWeatherSectionChildren.metrics = [...metricsValueElement];
+
+        const bannerOverlay = document.createElement("div");
+        bannerOverlay.classList.add("forecast-banner-overlay");
+
+        currentWeatherSectionChildren.bannerElement = currentWeatherSection.replaceChild(bannerOverlay, currentWeatherSection.firstElementChild);
+
+        const loaderContainer = document.createElement("div");
+        const svgSpan = document.createElement("span");
+        for (let i = 0; i < 3; i++) {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("viewBox", "0 0 100 100");
+            svg.style.height = '20px';
+            svg.style.width = '20px';
+
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", "50");
+            circle.setAttribute("cy", "50");
+            circle.setAttribute("r", "50");
+            circle.setAttribute("fill", "var(--primary-300)");
+
+            svg.appendChild(circle);
+            svgSpan.appendChild(svg);
+        }
+
+
+        const textNode = document.createElement("span");
+
+        textNode.textContent = "Loading...";
+        textNode.style.fontSize = "calc(var(--font-size) * 1.2)";
+        loaderContainer.classList.add("loader-container");
+
+        loaderContainer.appendChild(svgSpan);
+        bannerOverlay.appendChild(loaderContainer);
+        bannerOverlay.appendChild(textNode);
+
+        metricsValueElement.forEach((metric) => {
+            metric.textContent = "—";
+        });
+
+        dailyWeatherSection.forEach((card) => {
+            const children = Array.from(card.children);
+            dailyWeatherSectionChildren.push(...children);
+        });
+
+        hourlyWeatherSection.forEach((card) => {
+            const children = Array.from(card.children);
+            hourlyWeatherSectionChildren.push(...children);
+        });
+
         pageLoadingState.setActualChildren({
-            currentWeatherSection: [...currentWeatherSectionChildren],
+            currentWeatherSection: { ...currentWeatherSectionChildren },
             dailyWeatherSection: [...dailyWeatherSectionChildren],
             hourlyWeatherSection: [...hourlyWeatherSectionChildren]
         });
-        currentWeatherSection.replaceChildren("Loading...");
-        dailyWeatherSection.replaceChildren("Loading...");
-        hourlyWeatherSection.replaceChildren("Loading...");
+        console.log("Actual children set to: ", pageLoadingState.actualChildren);
     } else {
-        currentWeatherSection.replaceChildren(...pageLoadingState.actualChildren.currentWeatherSection);
-        dailyWeatherSection.replaceChildren(...pageLoadingState.actualChildren.dailyWeatherSection);
-        hourlyWeatherSection.replaceChildren(...pageLoadingState.actualChildren.hourlyWeatherSection);
+
+
         pageLoadingState.setActualChildren(null);
     }
 }

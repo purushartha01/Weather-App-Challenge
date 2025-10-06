@@ -391,6 +391,7 @@ main {
   grid-template-rows: 5vh 1fr;
   grid-template-columns: repeat(7, 1fr);
   gap: 0.5rem 1rem;
+  margin-top: 1rem;
 }
 
 .daywise-forecast > h2 {
@@ -451,7 +452,7 @@ main {
 }
 
 .hourly-forecast {
-  max-height: 80dvh;
+  max-height: 70dvh;
   grid-column: 2/3;
   grid-row: 2 / span 2;
   background: var(--neutral-800);
@@ -736,6 +737,69 @@ option:focus {
 
 .hide {
   display: none;
+}
+
+.forecast-banner-overlay {
+  width: 100%;
+  grid-column: span 4;
+  grid-row: 1 / span 1;
+  aspect-ratio: 400/143;
+  background: var(--neutral-700);
+  border-radius: calc(var(--default-border-radius) * 1.2);
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.loader-container {
+  grid-row: 1/2;
+  grid-column: 1/1;
+}
+
+.loader-container ~ span {
+  align-self: flex-start;
+  text-align: center;
+}
+
+.loader-container > span {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: end;
+}
+
+.loader-container > span > svg {
+  height: 20px;
+  aspect-ratio: 1/1;
+  fill: var(--neutral-300);
+  animation: loader 0.6s ease-in-out infinite;
+}
+
+. .loader-container svg:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.loader-container svg:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loader-container svg:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes loader {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0);
+  }
 }
 
 @keyframes rotate {
