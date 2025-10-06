@@ -496,15 +496,10 @@ function setPageToLoading(indicator) {
         };
         const dailyWeatherSectionChildren = [];
         const hourlyWeatherSectionChildren = [];
-
         const metricsValueElement = currentWeatherSection.querySelectorAll("div:not(:first-child)>span:last-child");
-
-
         currentWeatherSectionChildren.metrics = [...metricsValueElement];
-
         const bannerOverlay = document.createElement("div");
         bannerOverlay.classList.add("forecast-banner-overlay");
-
         currentWeatherSectionChildren.bannerElement = currentWeatherSection.replaceChild(bannerOverlay, currentWeatherSection.firstElementChild);
 
         const loaderContainer = document.createElement("div");
@@ -557,8 +552,11 @@ function setPageToLoading(indicator) {
         });
         console.log("Actual children set to: ", pageLoadingState.actualChildren);
     } else {
-
-
+        currentWeatherSection.replaceChild(pageLoadingState.actualChildren.currentWeatherSection.bannerElement, currentWeatherSection.firstElementChild);
+        pageLoadingState.actualChildren.currentWeatherSection.metrics.forEach((metric, index) => {
+            const currentMetrics = currentWeatherSection.querySelectorAll("div:not(:first-child)>span:last-child");
+            currentMetrics[index].textContent = metric.textContent;
+        });
         pageLoadingState.setActualChildren(null);
     }
 }
