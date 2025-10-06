@@ -295,7 +295,7 @@ main {
 }
 
 .current-forecast {
-  max-height: 40vh;
+  max-height: 60vh;
   grid-column: 1/2;
   grid-row: 2/3;
   display: grid;
@@ -452,7 +452,7 @@ main {
 }
 
 .hourly-forecast {
-  max-height: 70dvh;
+  max-height: 85dvh;
   grid-column: 2/3;
   grid-row: 2 / span 2;
   background: var(--neutral-800);
