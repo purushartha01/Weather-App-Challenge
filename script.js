@@ -74,10 +74,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // unitSelector.addEventListener("focusout", (e) => {
-        //     unitMenuButton.ariaExpanded = "false";
-        //     UnitListContainer.classList.remove("show");
-        // });
+        UnitListContainer.addEventListener("focusout", (e) => {
+            unitMenuButton.ariaExpanded = "false";
+            UnitListContainer.classList.remove("show");
+        });
 
         /* Unit Toggle Control */
         toggleUnitsElement.textContent = unitState.isMetric ? "Switch to Imperial" : "Switch to Metric";
@@ -92,6 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
             mmOption.classList.toggle("selected-option");
             inchOption.classList.toggle("selected-option");
             unitMenuButton.ariaExpanded = !unitMenuButton.ariaExpanded;
+            getCityWeather();
         });
         UnitListContainer.appendChild(toggleUnitsElement);
 
@@ -288,16 +289,30 @@ async function getCityWeather() {
         const roundedLat = Math.round((Number(cities.selectedCity.lat) + Number.EPSILON) * 100) / 100;
         const roundedLong = Math.round((Number(cities.selectedCity.lon) + Number.EPSILON) * 100) / 100;
 
-        const weatherParams = `&daily=weather_code,temperature_2m_max,temperature_2m_min&hourly=weather_code,temperature_2m&current=temperature_2m,wind_speed_10m,precipitation,apparent_temperature,weather_code,relative_humidity_2m,is_day&timezone=auto${unitState.isMetric ? "" : "&temperature_unit=fahrenheit&windspeed_unit=mph&precipitation_unit=inch"}`;
+        const weatherParams = `&daily=weather_code,temperature_2m_max,temperature_2m_min&hourly=weather_code,temperature_2m&current=temperature_2m,wind_speed_10m,precipitation,apparent_temperature,weather_code,relative_humidity_2m,is_day&forecast_days=7&timezone=auto${unitState.isMetric ? "" : "&temperature_unit=fahrenheit&windspeed_unit=mph&precipitation_unit=inch"}`;
 
         const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${roundedLat}&longitude=${roundedLong}${weatherParams}`);
 
         const weatherData = await weatherRes.json();
 
+        console.log("Fetched Weather Data:", weatherData);
+
         weather.current = { values: weatherData.current, units: weatherData.current_units };
         weather.daily = { values: weatherData.daily, units: weatherData.daily_units };
-        weather.hourly = { values: weatherData.hourly, units: weatherData.hourly_units };
-        console.log("Weather Object:", weatherData);
+        // weather.hourly = { values: weatherData.hourly, units: weatherData.hourly_units };
+        for (let i = 0; i < weatherData.hourly.time.length; i += 24) {
+            if (!weather.hourly) {
+                weather.hourly = { values: { time: [], weather_code: [], temperature_2m: [] }, units: weatherData.hourly_units };
+            }
+            const singleDayHourlyTime = weatherData.hourly.time.slice(i, i + 24);
+            const singleDayHourlyWeatherCode = weatherData.hourly.weather_code.slice(i, i + 24);
+            const singleDayHourlyTemperature = weatherData.hourly.temperature_2m.slice(i, i + 24);
+            weather.hourly.values.time.push(singleDayHourlyTime);
+            weather.hourly.values.weather_code.push(singleDayHourlyWeatherCode);
+            weather.hourly.values.temperature_2m.push(singleDayHourlyTemperature);
+        }
+
+        console.log("Weather Object:", weather);
         pageLoadingState.setIsLoading(false);
         setPageToLoading(pageLoadingState.isLoading);
 
@@ -372,30 +387,50 @@ function renderWeatherData() {
 
         /*------------------------------------------------------------------------------------------------------------------------------------------------------------ */
         // Elements to be updated in hourly weather section on data fetch
-        const hourlyWeatherContainerList = document.querySelectorAll(".hourly-forecast-card");
-        hourlyWeatherContainerList.forEach((hourCard, index) => {
-            const timeElement = hourCard.children[0];
-            const weatherIconElement = hourCard.children[1];
-            const temperatureElement = hourCard.children[2];
 
-            // rendered fetched data in components
-            const hourValue = weather.hourly.values.time[index].split("T")[1].split(":")[0];
-            const formattedTime = getHoursBy12HourFormat(hourValue);
-            timeElement.textContent = `${formattedTime.hour} ${formattedTime.period}`;
+        const hourlyDaySelectElement = document.querySelector("#weekday-selector");
+        const hourlyDayOptions = hourlyDaySelectElement.querySelectorAll("option");
+        hourlyDayOptions.forEach((option, index) => {
+            option.textContent = `${getFormattedDate(weather.hourly.values.time[index][0], { weekday: 'long' })}`;
+        });
 
-            const hourlyWeatherIconMetaData = getWeatherIconURL(weather.hourly.values.weather_code[index], (Number(hourValue) >= 6 && Number(hourValue) <= 18) ? 1 : 0);
-            weatherIconElement.src = hourlyWeatherIconMetaData.iconURL;
-            weatherIconElement.alt = hourlyWeatherIconMetaData.altText;
-            weatherIconElement.title = hourlyWeatherIconMetaData.weatherCondition;
-            temperatureElement.textContent = `${weather.hourly.values.temperature_2m[index]}°`;
+        console.log("Selected Hourly Day Index value:", weather.hourly.values.time[hourlyDaySelectElement.value][0]);
 
-        })
+        renderedHourlyData(hourlyDaySelectElement);
+
+        hourlyDaySelectElement.addEventListener("change", (e) => {
+            renderedHourlyData(e.target);
+        });
+
     }
     catch (err) {
         console.error("Error fetching weather data:", err);
     }
 }
 
+
+function renderedHourlyData(hourlyDaySelectElement) {
+    const hourlyWeatherContainerList = document.querySelectorAll(".hourly-forecast-card");
+
+    hourlyWeatherContainerList.forEach((hourCard, index) => {
+        const timeElement = hourCard.children[0];
+        const weatherIconElement = hourCard.children[1];
+        const temperatureElement = hourCard.children[2];
+
+        // rendered fetched data in components
+
+        const hourValue = weather.hourly.values.time[hourlyDaySelectElement.value][0].split("T")[1].split(":")[0];
+        const formattedTime = getHoursBy12HourFormat(hourValue);
+        timeElement.textContent = `${formattedTime.hour} ${formattedTime.period}`;
+
+        const hourlyWeatherIconMetaData = getWeatherIconURL(weather.hourly.values.weather_code[index], (Number(hourValue) >= 6 && Number(hourValue) <= 18) ? 1 : 0);
+        weatherIconElement.src = hourlyWeatherIconMetaData.iconURL;
+        weatherIconElement.alt = hourlyWeatherIconMetaData.altText;
+        weatherIconElement.title = hourlyWeatherIconMetaData.weatherCondition;
+        temperatureElement.textContent = `${weather.hourly.values.temperature_2m[index]}°`;
+
+    })
+}
 
 
 function setPageToLoading(indicator) {
