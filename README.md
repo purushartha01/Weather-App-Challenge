@@ -180,11 +180,10 @@ For further developments in ths App, I would consider integrating location based
 - [MDN](https://developer.mozilla.org/en-US/) - This helped me for proper in-depth research the features in HTML, CSS, JS.
 - [Clippy](https://bennettfeely.com/clippy/) - This website helped me to create proper SVGs easily.
 
-
 ## Author
 
-- Website - [Purushartha Singh Thakur](https://www.your-site.com)
-- Frontend Mentor - [@yourusername](https://www.frontendmentor.io/profile/yourusername)
+- Website - [Purushartha Singh Thakur](https://purushartha01.github.io/Weather-App-Challenge/)
+- Frontend Mentor - [@purushartha01](https://www.frontendmentor.io/profile/purushartha01)
 
 ## Acknowledgments
 
