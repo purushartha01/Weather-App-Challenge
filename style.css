@@ -295,12 +295,12 @@ main {
 }
 
 .current-forecast {
-  max-height: 40dvh;
+  max-height: 40vh;
   grid-column: 1/2;
   grid-row: 2/3;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: 2fr 1fr;
+  grid-template-rows: 3fr 1fr;
   gap: 1rem;
 }
 
@@ -384,7 +384,7 @@ main {
 }
 
 .daywise-forecast {
-  max-height: 40dvh;
+  max-height: 20dvh;
   grid-column: 1/2;
   grid-row: 3 / span 1;
   display: grid;
@@ -451,7 +451,7 @@ main {
 }
 
 .hourly-forecast {
-  max-height: 100dvh;
+  max-height: 80dvh;
   grid-column: 2/3;
   grid-row: 2 / span 2;
   background: var(--neutral-800);
@@ -494,7 +494,7 @@ select::picker-icon {
   fill: var(--neutral-0);
   position: relative;
   top: 50%;
-transform: translateY(-50%);
+  transform: translateY(-50%);
 }
 
 select,
@@ -692,15 +692,51 @@ option:focus {
   display: block;
 }
 
-.error-page{
-height: 100%;
-width: 100%;
-display: grid;
-grid-template-rows: 2fr 2fr 2fr 1fr;
-grid-template-columns: 1fr;
-align-items: center;
+.error-page {
+  max-height: 100%;
 }
 
+.error-page > div {
+  display: grid;
+  grid-template-rows: 2fr 2fr 2fr 1fr;
+  grid-template-columns: 1fr;
+  align-items: center;
+  justify-items: center;
+  height: 40dvh;
+}
+
+.error-page > div > svg {
+  height: 40px;
+  fill: var(--neutral-300);
+}
+
+.error-page > div > button {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  height: 5dvh;
+  aspect-ratio: 2/1;
+  border-radius: calc(var(--default-border-radius) * 1);
+  border: none;
+  background: var(--neutral-700);
+  color: var(--neutral-0);
+  cursor: pointer;
+}
+
+.error-page > div > button span {
+  font-size: calc(var(--font-size) * 0.9);
+}
+
+.error-page > div > button svg {
+  height: 20px;
+  aspect-ratio: 1/1;
+  fill: var(--neutral-0);
+}
+
+.hide {
+  display: none;
+}
 
 @keyframes rotate {
   from {

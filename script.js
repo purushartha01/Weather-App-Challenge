@@ -1,14 +1,21 @@
 const cities = {
     citiesFound: [],
     getCitiesByName: async function getCitiesByName(cityName) {
-        const geocodingAPIURL = `https://nominatim.openstreetmap.org/search?format=json&city=${encodeURIComponent(cityName)}&addressdetails=1`;
-        const coordsResponse = await fetch(geocodingAPIURL);
-        if (!coordsResponse.ok) {
-            console.error("Error fetching coordinates:", coordsResponse.statusText);
-            return;
+        try {
+
+            const geocodingAPIURL = `https://nominatim.openstreetmap.org/search?format=json&city=${encodeURIComponent(cityName)}&addressdetails=1`;
+            const coordsResponse = await fetch(geocodingAPIURL);
+
+            if (!coordsResponse.ok) {
+                console.error("Error fetching coordinates:", coordsResponse.statusText);
+                return;
+            }
+            const cities = await coordsResponse.json();
+            this.citiesFound = cities;
+        } catch (err) {
+            console.error("Error fetching cities:", err);
+            errorLoadingState.setErrorPage();
         }
-        const cities = await coordsResponse.json();
-        this.citiesFound = cities;
     },
     selectedCity: null
 }
@@ -31,9 +38,28 @@ const pageLoadingState = {
 }
 
 const errorLoadingState = {
-    mainElementChildren: [],
-    setMainElementChildren: function (children) {
-        this.mainElementChildren = children;
+    isAPIError: false,
+    setErrorPage: function () {
+        const mainContainer = document.querySelector("main");
+        const errorPage = document.querySelector(".error-page");
+        const retryBtn = errorPage.querySelector("#retry-btn");
+
+        if (!mainContainer || !errorPage || !retryBtn) return;
+
+        // Always show error page
+        mainContainer.classList.add("hide");
+        errorPage.classList.remove("hide");
+        this.isAPIError = true;
+
+        // Add listener only once
+        if (!retryBtn.dataset.listenerAdded) {
+            retryBtn.addEventListener("click", async () => {
+                mainContainer.classList.remove("hide");
+                errorPage.classList.add("hide");
+                this.isAPIError = false;
+            });
+            retryBtn.dataset.listenerAdded = "true";
+        }
     }
 }
 
@@ -164,6 +190,9 @@ document.addEventListener("DOMContentLoaded", () => {
             unitSelector.appendChild(UnitListContainer);
         }
 
+
+
+
         const cityNameInput = document.querySelector("#city-name");
         let timer;
         cityNameInput.addEventListener("input", async (e) => {
@@ -228,30 +257,9 @@ document.addEventListener("DOMContentLoaded", () => {
             await getCityWeather();
         });
     } catch (err) {
-        const mainContainer = document.querySelector("main");
-        errorLoadingState.setMainElementChildren([...mainContainer.children]);
-        showErrorPage(mainContainer);
+        console.error("Error during DOMContentLoaded:", err);
     }
 });
-
-async function showErrorPage(mainContainer) {
-    const svgSpan = document.createElement("span");
-    const svgFetchResponse = await fetch('./assets/images/icon-error.svg');
-    const svgText = await svgFetchResponse.text();
-    svgSpan.innerHTML = svgText;
-
-    const h2element = document.createElement("h2");
-    h2element.textContent = "Something went wrong";
-
-    const spanElement=document.createElement("span");
-    spanElement.textContent="We couldn't connect to the server(API error). Please try again in a few moments.";
-
-    const retryBtn=document.createElement("button");
-    retryBtn.textContent="Retry"
-
-
-    mainContainer.appendChild()
-}
 
 async function setSearchLoader() {
     const suggestionsList = document.querySelector(".search-suggestions");
@@ -317,17 +325,21 @@ async function getCityWeather() {
     }
     pageLoadingState.setIsLoading(true);
     setPageToLoading(pageLoadingState.isLoading);
+    const roundedLat = Math.round((Number(cities.selectedCity.lat) + Number.EPSILON) * 100) / 100;
+    const roundedLong = Math.round((Number(cities.selectedCity.lon) + Number.EPSILON) * 100) / 100;
+
+    const weatherParams = `&daily=weather_code,temperature_2m_max,temperature_2m_min&hourly=weather_code,temperature_2m&current=temperature_2m,wind_speed_10m,precipitation,apparent_temperature,weather_code,relative_humidity_2m,is_day&forecast_days=7&timezone=auto${unitState.isMetric ? "" : "&temperature_unit=fahrenheit&windspeed_unit=mph&precipitation_unit=inch"}`;
+
+
     try {
-        const roundedLat = Math.round((Number(cities.selectedCity.lat) + Number.EPSILON) * 100) / 100;
-        const roundedLong = Math.round((Number(cities.selectedCity.lon) + Number.EPSILON) * 100) / 100;
+        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${roundedLat}&longitudes=${roundedLong}${weatherParams}`);
 
-        const weatherParams = `&daily=weather_code,temperature_2m_max,temperature_2m_min&hourly=weather_code,temperature_2m&current=temperature_2m,wind_speed_10m,precipitation,apparent_temperature,weather_code,relative_humidity_2m,is_day&forecast_days=7&timezone=auto${unitState.isMetric ? "" : "&temperature_unit=fahrenheit&windspeed_unit=mph&precipitation_unit=inch"}`;
-
-        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${roundedLat}&longitude=${roundedLong}${weatherParams}`);
+        if (!weatherRes.ok) {
+            console.log(`Error fetching data: ${weatherRes.statusText}`);
+            throw new Error("Failed to fetch weather data");
+        }
 
         const weatherData = await weatherRes.json();
-
-        console.log("Fetched Weather Data:", weatherData);
 
         weather.current = { values: weatherData.current, units: weatherData.current_units };
         weather.daily = { values: weatherData.daily, units: weatherData.daily_units };
@@ -344,16 +356,13 @@ async function getCityWeather() {
             weather.hourly.values.temperature_2m.push(singleDayHourlyTemperature);
         }
 
-        console.log("Weather Object:", weather);
         pageLoadingState.setIsLoading(false);
         setPageToLoading(pageLoadingState.isLoading);
 
         renderWeatherData();
     } catch (err) {
         console.error("Error fetching weather data:", err);
-
-        pageLoadingState.setIsLoading(false);
-        setPageToLoading(pageLoadingState.isLoading);
+        errorLoadingState.setErrorPage();
     }
 }
 
