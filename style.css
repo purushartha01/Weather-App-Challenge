@@ -142,15 +142,13 @@ li {
   color: var(--neutral-0);
 }
 
-.sub-group{
+.sub-group {
   border-bottom: 2px solid var(--neutral-600);
 }
 
-li:last-child ul{
+li:last-child ul {
   border-bottom: none;
 }
-
-
 
 .selected-option {
   background: var(--neutral-700);
@@ -174,7 +172,6 @@ li:last-child ul{
 }
 
 main {
-  max-width: 100dvw;
   grid-row: 2/2;
   height: 100%;
   width: 80dvw;
@@ -298,12 +295,12 @@ main {
 }
 
 .current-forecast {
-  height: 40dvh;
+  max-height: 40dvh;
   grid-column: 1/2;
   grid-row: 2/3;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: 4fr 2fr;
+  grid-template-rows: 2fr 1fr;
   gap: 1rem;
 }
 
@@ -387,6 +384,7 @@ main {
 }
 
 .daywise-forecast {
+  max-height: 40dvh;
   grid-column: 1/2;
   grid-row: 3 / span 1;
   display: grid;
@@ -453,7 +451,7 @@ main {
 }
 
 .hourly-forecast {
-  max-height: 80dvh;
+  max-height: 100dvh;
   grid-column: 2/3;
   grid-row: 2 / span 2;
   background: var(--neutral-800);
@@ -462,7 +460,7 @@ main {
   grid-template-rows: 5vh 1fr;
   border-radius: calc(var(--default-border-radius) * 1.2);
   gap: 0.7rem;
-  padding: 0 1rem 2vh 1rem;
+  padding: 1rem;
 }
 
 .hourly-forecast > div:first-child {
@@ -470,19 +468,57 @@ main {
   grid-row: 1/1;
   text-align: left;
   align-self: center;
-  font-size: calc(var(--font-size) * 0.9);
-  font-family: var(--default-font);
-  font-weight: 400;
   letter-spacing: 1.2px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 3fr 4fr;
+  grid-template-rows: 1fr;
   align-items: center;
-  justify-content: space-between;
 }
 
 .hourly-forecast > div:first-child > h2 {
-  font-size: calc(var(--font-size));
+  grid-column: 1/2;
+  font-size: calc(var(--font-size) * 0.9);
   font-family: var(--default-font);
   font-weight: normal;
+}
+
+select {
+  grid-column: 2/2;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+}
+
+select::picker-icon {
+  content: url("./assets/images/caret-arrow.svg");
+  fill: var(--neutral-0);
+  position: relative;
+  top: 50%;
+transform: translateY(-50%);
+}
+
+select,
+::picker(select) {
+  appearance: base-select;
+}
+
+select,
+::picker(select) {
+  background: var(--neutral-700);
+  font-size: calc(var(--font-size) * 0.9);
+  color: var(--neutral-0);
+  cursor: pointer;
+  border: qpx solid var(--neutral-300);
+  padding: 0.5rem;
+}
+
+#weekday-selector > option {
+  width: 100%;
+}
+
+option:hover,
+option:focus {
+  background: var(--neutral-600);
 }
 
 .hourly-forecast-card-container {
@@ -655,6 +691,16 @@ main {
 .show {
   display: block;
 }
+
+.error-page{
+height: 100%;
+width: 100%;
+display: grid;
+grid-template-rows: 2fr 2fr 2fr 1fr;
+grid-template-columns: 1fr;
+align-items: center;
+}
+
 
 @keyframes rotate {
   from {

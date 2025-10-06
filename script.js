@@ -30,6 +30,13 @@ const pageLoadingState = {
     }
 }
 
+const errorLoadingState = {
+    mainElementChildren: [],
+    setMainElementChildren: function (children) {
+        this.mainElementChildren = children;
+    }
+}
+
 const unitState = {
     isMetric: true,
     toggleUnit: function () {
@@ -40,186 +47,211 @@ const unitState = {
 
 
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("DOM fully loaded and parsed");
-    {
-        const unitSelector = document.querySelector(".unit-selector-menu");
-        const unitMenuButton = unitSelector.querySelector("button");
-        const precipitationUnitGroup = document.createElement("li");
-        const UnitListContainer = document.createElement("ul");
-        const toggleUnitsElement = document.createElement("li");
-        const temperatureUnitGroup = document.createElement("li");
-        const temperatureSubGroup = document.createElement("ul");
-        const celsiusOption = document.createElement("li");
-        const fahrenheitOption = document.createElement("li");
-        const windSpeedUnitGroup = document.createElement("li");
-        const windSpeedSubGroup = document.createElement("ul");
-        const kmhOption = document.createElement("li");
-        const mphOption = document.createElement("li");
-        const precipitationSubGroup = document.createElement("ul");
-        const mmOption = document.createElement("li");
-        const inchOption = document.createElement("li");
+    try {
+
+        console.log("DOM fully loaded and parsed");
+        {
+            const unitSelector = document.querySelector(".unit-selector-menu");
+            const unitMenuButton = unitSelector.querySelector("button");
+            const precipitationUnitGroup = document.createElement("li");
+            const UnitListContainer = document.createElement("ul");
+            const toggleUnitsElement = document.createElement("li");
+            const temperatureUnitGroup = document.createElement("li");
+            const temperatureSubGroup = document.createElement("ul");
+            const celsiusOption = document.createElement("li");
+            const fahrenheitOption = document.createElement("li");
+            const windSpeedUnitGroup = document.createElement("li");
+            const windSpeedSubGroup = document.createElement("ul");
+            const kmhOption = document.createElement("li");
+            const mphOption = document.createElement("li");
+            const precipitationSubGroup = document.createElement("ul");
+            const mmOption = document.createElement("li");
+            const inchOption = document.createElement("li");
 
 
-        UnitListContainer.classList.add("unit-list");
-        unitMenuButton.ariaExpanded = "false";
+            UnitListContainer.classList.add("unit-list");
+            unitMenuButton.ariaExpanded = "false";
 
-        unitMenuButton.addEventListener("click", (e) => {
-            e.preventDefault();
-            if (unitMenuButton.ariaExpanded === "true") {
+            unitMenuButton.addEventListener("click", (e) => {
+                e.preventDefault();
+                if (unitMenuButton.ariaExpanded === "true") {
+                    unitMenuButton.ariaExpanded = "false";
+                    UnitListContainer.classList.remove("show");
+                } else {
+                    unitMenuButton.ariaExpanded = "true";
+                    UnitListContainer.classList.add("show");
+                }
+            });
+
+            UnitListContainer.addEventListener("focusout", (e) => {
                 unitMenuButton.ariaExpanded = "false";
                 UnitListContainer.classList.remove("show");
-            } else {
-                unitMenuButton.ariaExpanded = "true";
-                UnitListContainer.classList.add("show");
-            }
-        });
+            });
 
-        UnitListContainer.addEventListener("focusout", (e) => {
-            unitMenuButton.ariaExpanded = "false";
-            UnitListContainer.classList.remove("show");
-        });
-
-        /* Unit Toggle Control */
-        toggleUnitsElement.textContent = unitState.isMetric ? "Switch to Imperial" : "Switch to Metric";
-        toggleUnitsElement.tabIndex = -1;
-        toggleUnitsElement.addEventListener("click", () => {
-            unitState.toggleUnit();
+            /* Unit Toggle Control */
             toggleUnitsElement.textContent = unitState.isMetric ? "Switch to Imperial" : "Switch to Metric";
-            celsiusOption.classList.toggle("selected-option");
-            fahrenheitOption.classList.toggle("selected-option");
-            kmhOption.classList.toggle("selected-option");
-            mphOption.classList.toggle("selected-option");
-            mmOption.classList.toggle("selected-option");
-            inchOption.classList.toggle("selected-option");
-            unitMenuButton.ariaExpanded = !unitMenuButton.ariaExpanded;
-            getCityWeather();
-        });
-        UnitListContainer.appendChild(toggleUnitsElement);
+            toggleUnitsElement.tabIndex = -1;
+            toggleUnitsElement.addEventListener("click", () => {
+                unitState.toggleUnit();
+                toggleUnitsElement.textContent = unitState.isMetric ? "Switch to Imperial" : "Switch to Metric";
+                celsiusOption.classList.toggle("selected-option");
+                fahrenheitOption.classList.toggle("selected-option");
+                kmhOption.classList.toggle("selected-option");
+                mphOption.classList.toggle("selected-option");
+                mmOption.classList.toggle("selected-option");
+                inchOption.classList.toggle("selected-option");
+                unitMenuButton.ariaExpanded = !unitMenuButton.ariaExpanded;
+                getCityWeather();
+            });
+            UnitListContainer.appendChild(toggleUnitsElement);
 
 
-        /* temperature units option group */
-        temperatureSubGroup.textContent = "Temperature";
-        temperatureSubGroup.classList.add("sub-group");
-        celsiusOption.textContent = "Celsius (°C)";
-        if (unitState.isMetric) {
-            celsiusOption.classList.add("selected-option");
-        }
-        celsiusOption.tabIndex = -1;
-        fahrenheitOption.textContent = "Fahrenheit (°F)";
-        fahrenheitOption.tabIndex = -1;
-        if (!unitState.isMetric) {
-            fahrenheitOption.classList.add("selected-option");
-        }
-        temperatureSubGroup.appendChild(celsiusOption);
-        temperatureSubGroup.appendChild(fahrenheitOption);
-        temperatureUnitGroup.appendChild(temperatureSubGroup);
-        UnitListContainer.appendChild(temperatureUnitGroup);
+            /* temperature units option group */
+            temperatureSubGroup.textContent = "Temperature";
+            temperatureSubGroup.classList.add("sub-group");
+            celsiusOption.textContent = "Celsius (°C)";
+            if (unitState.isMetric) {
+                celsiusOption.classList.add("selected-option");
+            }
+            celsiusOption.tabIndex = -1;
+            fahrenheitOption.textContent = "Fahrenheit (°F)";
+            fahrenheitOption.tabIndex = -1;
+            if (!unitState.isMetric) {
+                fahrenheitOption.classList.add("selected-option");
+            }
+            temperatureSubGroup.appendChild(celsiusOption);
+            temperatureSubGroup.appendChild(fahrenheitOption);
+            temperatureUnitGroup.appendChild(temperatureSubGroup);
+            UnitListContainer.appendChild(temperatureUnitGroup);
 
-        /* wind speed units option group */
-        windSpeedSubGroup.textContent = "Wind Speed";
-        windSpeedSubGroup.classList.add("sub-group");
-        kmhOption.textContent = "km/h";
-        kmhOption.tabIndex = -1;
-        if (unitState.isMetric) {
-            kmhOption.classList.add("selected-option");
+            /* wind speed units option group */
+            windSpeedSubGroup.textContent = "Wind Speed";
+            windSpeedSubGroup.classList.add("sub-group");
+            kmhOption.textContent = "km/h";
+            kmhOption.tabIndex = -1;
+            if (unitState.isMetric) {
+                kmhOption.classList.add("selected-option");
+            }
+
+            mphOption.textContent = "mph";
+            mphOption.tabIndex = -1;
+            if (!unitState.isMetric) {
+                mphOption.classList.add("selected-option");
+            }
+            windSpeedSubGroup.appendChild(kmhOption);
+            windSpeedSubGroup.appendChild(mphOption);
+            windSpeedUnitGroup.appendChild(windSpeedSubGroup);
+            UnitListContainer.appendChild(windSpeedUnitGroup);
+
+            /* precipitation units option group */
+            precipitationSubGroup.textContent = "Precipitation";
+            precipitationSubGroup.classList.add("sub-group");
+            mmOption.textContent = "Millimeter (mm)";
+            mmOption.tabIndex = -1;
+            if (unitState.isMetric) {
+                mmOption.classList.add("selected-option");
+            }
+            inchOption.textContent = "Inch (in)";
+            inchOption.tabIndex = -1;
+            if (!unitState.isMetric) {
+                inchOption.classList.add("selected-option");
+            }
+
+            precipitationSubGroup.appendChild(mmOption);
+            precipitationSubGroup.appendChild(inchOption);
+            precipitationUnitGroup.appendChild(precipitationSubGroup);
+            UnitListContainer.appendChild(precipitationUnitGroup);
+            unitSelector.appendChild(UnitListContainer);
         }
 
-        mphOption.textContent = "mph";
-        mphOption.tabIndex = -1;
-        if (!unitState.isMetric) {
-            mphOption.classList.add("selected-option");
-        }
-        windSpeedSubGroup.appendChild(kmhOption);
-        windSpeedSubGroup.appendChild(mphOption);
-        windSpeedUnitGroup.appendChild(windSpeedSubGroup);
-        UnitListContainer.appendChild(windSpeedUnitGroup);
-
-        /* precipitation units option group */
-        precipitationSubGroup.textContent = "Precipitation";
-        precipitationSubGroup.classList.add("sub-group");
-        mmOption.textContent = "Millimeter (mm)";
-        mmOption.tabIndex = -1;
-        if (unitState.isMetric) {
-            mmOption.classList.add("selected-option");
-        }
-        inchOption.textContent = "Inch (in)";
-        inchOption.tabIndex = -1;
-        if (!unitState.isMetric) {
-            inchOption.classList.add("selected-option");
-        }
-
-        precipitationSubGroup.appendChild(mmOption);
-        precipitationSubGroup.appendChild(inchOption);
-        precipitationUnitGroup.appendChild(precipitationSubGroup);
-        UnitListContainer.appendChild(precipitationUnitGroup);
-        unitSelector.appendChild(UnitListContainer);
-    }
-
-    const cityNameInput = document.querySelector("#city-name");
-    let timer;
-    cityNameInput.addEventListener("input", async (e) => {
-        clearTimeout(timer);
-        if (e.target.value.length < 2) {
-            return;
-        }
-        timer = setTimeout(async () => {
-            const cityName = e.target.value.trim().toLowerCase();
-            setSearchLoader();
-            // console.log("Finding cities with name: ", cityName);
-            await cities.getCitiesByName(cityName);
-            createCitySuggestionsList();
+        const cityNameInput = document.querySelector("#city-name");
+        let timer;
+        cityNameInput.addEventListener("input", async (e) => {
             clearTimeout(timer);
-        }, 500);
-    });
-
-    let focussedCityIndex = -1;
-
-    cityNameInput.addEventListener("keydown", (e) => {
-        const suggestionsList = document.querySelector(".search-suggestions");
-        const items = suggestionsList.querySelectorAll("li");
-        if (suggestionsList.classList.contains("show")) {
-            items.forEach(item => item.classList.remove("active"));
-            switch (e.key) {
-                case "ArrowDown":
-                    // e.preventDefault();
-                    e.stopPropagation();
-                    if (items.length > 0 && focussedCityIndex < items.length - 1) {
-                        focussedCityIndex += 1;
-                    }
-                    items[focussedCityIndex].classList.add("active");
-                    break;
-                case "ArrowUp":
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (items.length > 0 && focussedCityIndex > 0) {
-                        focussedCityIndex -= 1;
-                    }
-                    items[focussedCityIndex].classList.add("active");
-                    break;
-                case "Enter":
-                    e.preventDefault();
-                    if (items.length > 0 && focussedCityIndex >= 0) {
-                        items[focussedCityIndex].click();
-                    }
-
-                    break;
-                case "Escape":
-                    suggestionsList.classList.remove("show");
-                    focussedCityIndex = -1;
-                    break;
+            if (e.target.value.length < 2) {
+                return;
             }
-            if (focussedCityIndex >= 0 && focussedCityIndex < items.length) {
-                items[focussedCityIndex].scrollIntoView({ behavior: "auto", block: "nearest" });
-            }
-        }
-    });
+            timer = setTimeout(async () => {
+                const cityName = e.target.value.trim().toLowerCase();
+                setSearchLoader();
+                // console.log("Finding cities with name: ", cityName);
+                await cities.getCitiesByName(cityName);
+                createCitySuggestionsList();
+                clearTimeout(timer);
+            }, 500);
+        });
 
-    const getCityWeatherBtn = document.querySelector("#get-city-weather");
-    getCityWeatherBtn.addEventListener("click", async () => {
-        await getCityWeather();
-    });
+        let focussedCityIndex = -1;
+
+        cityNameInput.addEventListener("keydown", (e) => {
+            const suggestionsList = document.querySelector(".search-suggestions");
+            const items = suggestionsList.querySelectorAll("li");
+            if (suggestionsList.classList.contains("show")) {
+                items.forEach(item => item.classList.remove("active"));
+                switch (e.key) {
+                    case "ArrowDown":
+                        // e.preventDefault();
+                        e.stopPropagation();
+                        if (items.length > 0 && focussedCityIndex < items.length - 1) {
+                            focussedCityIndex += 1;
+                        }
+                        items[focussedCityIndex].classList.add("active");
+                        break;
+                    case "ArrowUp":
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (items.length > 0 && focussedCityIndex > 0) {
+                            focussedCityIndex -= 1;
+                        }
+                        items[focussedCityIndex].classList.add("active");
+                        break;
+                    case "Enter":
+                        e.preventDefault();
+                        if (items.length > 0 && focussedCityIndex >= 0) {
+                            items[focussedCityIndex].click();
+                        }
+
+                        break;
+                    case "Escape":
+                        suggestionsList.classList.remove("show");
+                        focussedCityIndex = -1;
+                        break;
+                }
+                if (focussedCityIndex >= 0 && focussedCityIndex < items.length) {
+                    items[focussedCityIndex].scrollIntoView({ behavior: "auto", block: "nearest" });
+                }
+            }
+        });
+
+        const getCityWeatherBtn = document.querySelector("#get-city-weather");
+        getCityWeatherBtn.addEventListener("click", async () => {
+            await getCityWeather();
+        });
+    } catch (err) {
+        const mainContainer = document.querySelector("main");
+        errorLoadingState.setMainElementChildren([...mainContainer.children]);
+        showErrorPage(mainContainer);
+    }
 });
 
+async function showErrorPage(mainContainer) {
+    const svgSpan = document.createElement("span");
+    const svgFetchResponse = await fetch('./assets/images/icon-error.svg');
+    const svgText = await svgFetchResponse.text();
+    svgSpan.innerHTML = svgText;
+
+    const h2element = document.createElement("h2");
+    h2element.textContent = "Something went wrong";
+
+    const spanElement=document.createElement("span");
+    spanElement.textContent="We couldn't connect to the server(API error). Please try again in a few moments.";
+
+    const retryBtn=document.createElement("button");
+    retryBtn.textContent="Retry"
+
+
+    mainContainer.appendChild()
+}
 
 async function setSearchLoader() {
     const suggestionsList = document.querySelector(".search-suggestions");
@@ -394,7 +426,6 @@ function renderWeatherData() {
             option.textContent = `${getFormattedDate(weather.hourly.values.time[index][0], { weekday: 'long' })}`;
         });
 
-        console.log("Selected Hourly Day Index value:", weather.hourly.values.time[hourlyDaySelectElement.value][0]);
 
         renderedHourlyData(hourlyDaySelectElement);
 
@@ -419,15 +450,15 @@ function renderedHourlyData(hourlyDaySelectElement) {
 
         // rendered fetched data in components
 
-        const hourValue = weather.hourly.values.time[hourlyDaySelectElement.value][0].split("T")[1].split(":")[0];
+        const hourValue = weather.hourly.values.time[hourlyDaySelectElement.value][index].split("T")[1].split(":")[0];
         const formattedTime = getHoursBy12HourFormat(hourValue);
         timeElement.textContent = `${formattedTime.hour} ${formattedTime.period}`;
 
-        const hourlyWeatherIconMetaData = getWeatherIconURL(weather.hourly.values.weather_code[index], (Number(hourValue) >= 6 && Number(hourValue) <= 18) ? 1 : 0);
+        const hourlyWeatherIconMetaData = getWeatherIconURL(weather.hourly.values.weather_code[hourlyDaySelectElement.value][index], (Number(hourValue) >= 6 && Number(hourValue) <= 18) ? 1 : 0);
         weatherIconElement.src = hourlyWeatherIconMetaData.iconURL;
         weatherIconElement.alt = hourlyWeatherIconMetaData.altText;
         weatherIconElement.title = hourlyWeatherIconMetaData.weatherCondition;
-        temperatureElement.textContent = `${weather.hourly.values.temperature_2m[index]}°`;
+        temperatureElement.textContent = `${weather.hourly.values.temperature_2m[hourlyDaySelectElement.value][index]}°`;
 
     })
 }
