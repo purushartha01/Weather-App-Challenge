@@ -88,41 +88,89 @@ nav {
   padding: 0 8rem;
 }
 
-.custom-dropdown {
+.unit-selector-menu {
   position: relative;
-  height: 60%;
-  aspect-ratio: 3/1;
+  width: 10dvw;
+  height: 70%;
   display: grid;
   align-items: center;
-  justify-items: center;
-  cursor: pointer;
-  background: var(--neutral-800);
+  justify-content: center;
 }
 
-.custom-dropdown > select {
-  display: none;
-}
-
-.option-container {
-  position: absolute;
-  top: 0;
-  left: 0;
+.unit-selector-menu > button {
   width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: var(--neutral-0);
+  height: 90%;
+  padding: 0 0.5rem;
   background: var(--neutral-800);
-  z-index: 99;
+  color: var(--neutral-0);
+  border: none;
+  border-radius: var(--default-border-radius);
+  font-size: calc(var(--font-size) * 0.9);
+  cursor: pointer;
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
 }
+
+.unit-list {
+  display: none;
+  position: absolute;
+  top: 110%;
+  right: 0;
+  width: 200%;
+  height: auto;
+  background: var(--neutral-800);
+  border-radius: calc(var(--default-border-radius) * 1.2);
+  list-style: none;
+  padding: 0 1rem;
+  z-index: 100;
+}
+
+ul {
+  font-size: calc(var(--font-size) * 0.8);
+  color: var(--neutral-300);
+}
+
+li {
+  list-style: none;
+  width: 100%;
+  padding: 0.5rem 0;
+  border-radius: calc(var(--default-border-radius) * 1.2);
+  font-size: calc(var(--font-size) * 1);
+  cursor: pointer;
+  color: var(--neutral-0);
+}
+
+.sub-group{
+  border-bottom: 2px solid var(--neutral-600);
+}
+
+li:last-child ul{
+  border-bottom: none;
+}
+
+
 
 .selected-option {
-  background-color: var(--neutral-700);
+  background: var(--neutral-700);
 }
 
 .selected-option::after {
-  content: url("./assets/icons/icon-checkmark.svg");
+  content: url("./assets/images/icon-checkmark.svg");
+  justify-self: end;
+  align-self: center;
+  width: 16px;
+  aspect-ratio: 1/1;
+  float: right;
+}
+
+.unit-selector-menu > button > svg {
+  height: 100%;
+  aspect-ratio: 1/1;
+  justify-self: center;
+  align-self: center;
+  transition: transform 0.3s ease;
 }
 
 main {
@@ -490,7 +538,7 @@ main {
 
 @media screen and (max-width: 768px) {
   nav {
-    padding: 0 1rem;
+    padding: 0 1.1rem 0 1rem;
   }
 
   main {

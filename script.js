@@ -30,9 +30,130 @@ const pageLoadingState = {
     }
 }
 
+const unitState = {
+    isMetric: true,
+    toggleUnit: function () {
+        this.isMetric = !this.isMetric;
+    },
+}
+
+
 
 document.addEventListener("DOMContentLoaded", () => {
     console.log("DOM fully loaded and parsed");
+    {
+        const unitSelector = document.querySelector(".unit-selector-menu");
+        const unitMenuButton = unitSelector.querySelector("button");
+        const precipitationUnitGroup = document.createElement("li");
+        const UnitListContainer = document.createElement("ul");
+        const toggleUnitsElement = document.createElement("li");
+        const temperatureUnitGroup = document.createElement("li");
+        const temperatureSubGroup = document.createElement("ul");
+        const celsiusOption = document.createElement("li");
+        const fahrenheitOption = document.createElement("li");
+        const windSpeedUnitGroup = document.createElement("li");
+        const windSpeedSubGroup = document.createElement("ul");
+        const kmhOption = document.createElement("li");
+        const mphOption = document.createElement("li");
+        const precipitationSubGroup = document.createElement("ul");
+        const mmOption = document.createElement("li");
+        const inchOption = document.createElement("li");
+
+
+        UnitListContainer.classList.add("unit-list");
+        unitMenuButton.ariaExpanded = "false";
+
+        unitMenuButton.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (unitMenuButton.ariaExpanded === "true") {
+                unitMenuButton.ariaExpanded = "false";
+                UnitListContainer.classList.remove("show");
+            } else {
+                unitMenuButton.ariaExpanded = "true";
+                UnitListContainer.classList.add("show");
+            }
+        });
+
+        // unitSelector.addEventListener("focusout", (e) => {
+        //     unitMenuButton.ariaExpanded = "false";
+        //     UnitListContainer.classList.remove("show");
+        // });
+
+        /* Unit Toggle Control */
+        toggleUnitsElement.textContent = unitState.isMetric ? "Switch to Imperial" : "Switch to Metric";
+        toggleUnitsElement.tabIndex = -1;
+        toggleUnitsElement.addEventListener("click", () => {
+            unitState.toggleUnit();
+            toggleUnitsElement.textContent = unitState.isMetric ? "Switch to Imperial" : "Switch to Metric";
+            celsiusOption.classList.toggle("selected-option");
+            fahrenheitOption.classList.toggle("selected-option");
+            kmhOption.classList.toggle("selected-option");
+            mphOption.classList.toggle("selected-option");
+            mmOption.classList.toggle("selected-option");
+            inchOption.classList.toggle("selected-option");
+            unitMenuButton.ariaExpanded = !unitMenuButton.ariaExpanded;
+        });
+        UnitListContainer.appendChild(toggleUnitsElement);
+
+
+        /* temperature units option group */
+        temperatureSubGroup.textContent = "Temperature";
+        temperatureSubGroup.classList.add("sub-group");
+        celsiusOption.textContent = "Celsius (°C)";
+        if (unitState.isMetric) {
+            celsiusOption.classList.add("selected-option");
+        }
+        celsiusOption.tabIndex = -1;
+        fahrenheitOption.textContent = "Fahrenheit (°F)";
+        fahrenheitOption.tabIndex = -1;
+        if (!unitState.isMetric) {
+            fahrenheitOption.classList.add("selected-option");
+        }
+        temperatureSubGroup.appendChild(celsiusOption);
+        temperatureSubGroup.appendChild(fahrenheitOption);
+        temperatureUnitGroup.appendChild(temperatureSubGroup);
+        UnitListContainer.appendChild(temperatureUnitGroup);
+
+        /* wind speed units option group */
+        windSpeedSubGroup.textContent = "Wind Speed";
+        windSpeedSubGroup.classList.add("sub-group");
+        kmhOption.textContent = "km/h";
+        kmhOption.tabIndex = -1;
+        if (unitState.isMetric) {
+            kmhOption.classList.add("selected-option");
+        }
+
+        mphOption.textContent = "mph";
+        mphOption.tabIndex = -1;
+        if (!unitState.isMetric) {
+            mphOption.classList.add("selected-option");
+        }
+        windSpeedSubGroup.appendChild(kmhOption);
+        windSpeedSubGroup.appendChild(mphOption);
+        windSpeedUnitGroup.appendChild(windSpeedSubGroup);
+        UnitListContainer.appendChild(windSpeedUnitGroup);
+
+        /* precipitation units option group */
+        precipitationSubGroup.textContent = "Precipitation";
+        precipitationSubGroup.classList.add("sub-group");
+        mmOption.textContent = "Millimeter (mm)";
+        mmOption.tabIndex = -1;
+        if (unitState.isMetric) {
+            mmOption.classList.add("selected-option");
+        }
+        inchOption.textContent = "Inch (in)";
+        inchOption.tabIndex = -1;
+        if (!unitState.isMetric) {
+            inchOption.classList.add("selected-option");
+        }
+
+        precipitationSubGroup.appendChild(mmOption);
+        precipitationSubGroup.appendChild(inchOption);
+        precipitationUnitGroup.appendChild(precipitationSubGroup);
+        UnitListContainer.appendChild(precipitationUnitGroup);
+        unitSelector.appendChild(UnitListContainer);
+    }
+
     const cityNameInput = document.querySelector("#city-name");
     let timer;
     cityNameInput.addEventListener("input", async (e) => {
@@ -167,7 +288,7 @@ async function getCityWeather() {
         const roundedLat = Math.round((Number(cities.selectedCity.lat) + Number.EPSILON) * 100) / 100;
         const roundedLong = Math.round((Number(cities.selectedCity.lon) + Number.EPSILON) * 100) / 100;
 
-        const weatherParams = `&daily=weather_code,temperature_2m_max,temperature_2m_min&hourly=weather_code,temperature_2m&current=temperature_2m,wind_speed_10m,precipitation,apparent_temperature,weather_code,relative_humidity_2m,is_day&timezone=auto`;
+        const weatherParams = `&daily=weather_code,temperature_2m_max,temperature_2m_min&hourly=weather_code,temperature_2m&current=temperature_2m,wind_speed_10m,precipitation,apparent_temperature,weather_code,relative_humidity_2m,is_day&timezone=auto${unitState.isMetric ? "" : "&temperature_unit=fahrenheit&windspeed_unit=mph&precipitation_unit=inch"}`;
 
         const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${roundedLat}&longitude=${roundedLong}${weatherParams}`);
 
@@ -379,6 +500,25 @@ function getFormattedDate(dateString, options, locale = undefined) {
     return date;
 }
 
+function updateUnitMenu() {
+    const displayElement = document.createElement("option");
+    displayElement.textContent = "Units"
+}
+
 function renderUnitSelectorMenu() {
-    const unitSelectorContainer = document.querySelector(".custom-dropdown-menu");
+    const unitSelector = document.querySelector(".unit-selector-menu");
+    const unitMenuButton = unitSelector.querySelector("button");
+
+    unitMenuButton.ariaExpanded = !unitMenuButton.ariaExpanded;
+    UnitListContainer.classList.add("show");
+
+
+
+
+
+
+    unitSelector.appendChild(UnitListContainer);
+    const isExpanded = unitMenuButton.getAttribute("aria-expanded") === "true";
+    unitMenuButton.setAttribute("aria-expanded", String(!isExpanded));
+
 }
